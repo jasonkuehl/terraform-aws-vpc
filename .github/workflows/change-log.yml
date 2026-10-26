@@ -5,9 +5,22 @@ on:
       - main
 jobs:
   changelog:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
-      - name: "✏️ Generate release changelog"
-        uses: heinrichreimer/github-changelog-generator-action@v2.3
+      - uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GITHUB_TOKEN }} 
+          fetch-depth: 0
+
+      # github-changelog-generator reads GitHub's API; git-cliff only needs git history
+      - name: "✏️ Generate release changelog"
+        uses: orhun/git-cliff-action@v4
+        with:
+          args: --verbose
+        env:
+          OUTPUT: CHANGELOG.md
+
+      - name: Upload changelog
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog
+          path: CHANGELOG.md
