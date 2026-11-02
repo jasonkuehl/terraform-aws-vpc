@@ -6,32 +6,15 @@ on:
 jobs:
   docs:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-    - uses: https://git.yolo.fail/actions/checkout@v4
+    - uses: actions/checkout@v2
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
 
-    # terraform-docs/gh-actions passes its inputs through `${{ inputs.* }}` in a Docker
-    # action env block, which the Gitea runner leaves unexpanded, so run the CLI directly
-    - name: Install terraform-docs
-      env:
-        TFDOCS_VERSION: 0.24.0
-      run: |
-        base="https://github.com/terraform-docs/terraform-docs/releases/download/v${TFDOCS_VERSION}"
-        file="terraform-docs-v${TFDOCS_VERSION}-linux-amd64.tar.gz"
-        curl -fsSLO "$base/$file"
-        curl -fsSL "$base/terraform-docs-v${TFDOCS_VERSION}.sha256sum" | grep " ${file}$" | sha256sum -c -
-        tar -xzf "$file" terraform-docs && install -m 755 terraform-docs /usr/local/bin/terraform-docs && rm -f terraform-docs "$file"
-
-    - name: Render terraform docs inside the USAGE.md and push changes
-      run: |
-        terraform-docs markdown table --output-file USAGE.md --output-mode inject .
-        git add USAGE.md
-        if git diff --cached --quiet; then
-          echo "USAGE.md is up to date"
-          exit 0
-        fi
-        git config user.name "gitea-actions[bot]"
-        git config user.email "gitea-actions[bot]@git.yolo.fail"
-        git commit -m "terraform-docs: automated action"
-        git push
+    - name: Render terraform docs inside the USAGE.md and push changes back to PR branch
+      uses: terraform-docs/gh-actions@v0.11.0
+      with:
+        working-dir: .
+        output-file: USAGE.md
+        output-method: inject
+        git-push: "true"

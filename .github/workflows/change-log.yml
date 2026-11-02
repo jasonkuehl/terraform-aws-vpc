@@ -5,32 +5,9 @@ on:
       - main
 jobs:
   changelog:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
-      - uses: https://git.yolo.fail/actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      # git-cliff-action downloads git-cliff through GitHub's API with the job token,
-      # which is a Gitea token here, so install the release binary directly
-      - name: Install git-cliff
-        env:
-          GIT_CLIFF_VERSION: 2.14.2
-        run: |
-          base="https://github.com/orhun/git-cliff/releases/download/v${GIT_CLIFF_VERSION}"
-          file="git-cliff-${GIT_CLIFF_VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-          curl -fsSLO "$base/$file"
-          curl -fsSL "$base/$file.sha512" | awk -v f="$file" '{print $1"  "f}' | sha512sum -c -
-          tar -xzf "$file"
-          install -m 755 "git-cliff-${GIT_CLIFF_VERSION}/git-cliff" /usr/local/bin/git-cliff
-          rm -rf "git-cliff-${GIT_CLIFF_VERSION}" "$file"
-
       - name: "✏️ Generate release changelog"
-        run: git-cliff --verbose --output CHANGELOG.md
-
-      - name: Upload changelog
-        # upload-artifact v4+ refuses to run on Gitea (it reports itself as GitHub Enterprise Server)
-        uses: https://git.yolo.fail/actions/upload-artifact@v3
+        uses: heinrichreimer/github-changelog-generator-action@v2.3
         with:
-          name: changelog
-          path: CHANGELOG.md
+          token: ${{ secrets.GITHUB_TOKEN }} 
