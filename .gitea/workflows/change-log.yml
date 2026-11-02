@@ -30,7 +30,7 @@ jobs:
 
       - name: Upload changelog
         # upload-artifact v4+ refuses to run on Gitea (it reports itself as GitHub Enterprise Server)
-        uses: https://git.yolo.fail/actions/upload-artifact@v3
+        uses: https://git.yolo.fail/actions/upload-artifact@v7
         with:
           name: changelog
           path: CHANGELOG.md
