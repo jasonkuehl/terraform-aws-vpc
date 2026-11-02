@@ -9,7 +9,7 @@ jobs:
     permissions:
       contents: write
     steps:
-    - uses: https://git.yolo.fail/actions/checkout@v4
+    - uses: https://git.yolo.fail/actions/checkout@v7
 
     # terraform-docs/gh-actions passes its inputs through `${{ inputs.* }}` in a Docker
     # action env block, which the Gitea runner leaves unexpanded, so run the CLI directly
